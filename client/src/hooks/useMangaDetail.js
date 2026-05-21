@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getMangaDetail } from "../api/mangadex";
+import { getMangaDetails } from "../api/mangadex";
 
 //This Fecthes manga details like author, title, description e.t.c.
 export const useMangaDetail = (mangaId) => {
@@ -14,7 +14,7 @@ export const useMangaDetail = (mangaId) => {
       try {
         setLoading(true);
 
-        const data = await getMangaDetail(mangaId);
+        const data = await getMangaDetails(mangaId);
 
         setRating(data.stats);
         setManga(data.manga);
