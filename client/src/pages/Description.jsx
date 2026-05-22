@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useMangaDetail } from "../hooks/useMangaDetail";
 import { useChapter } from "../hooks/useChapter";
-import { useRecommendations } from "../hooks/UseRecommendation";
+import { useRecommendations } from "../hooks/useRecommendation";
 import {
   addBookmark,
   removeBookmark,
