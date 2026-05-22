@@ -1,5 +1,13 @@
 import express from "express";
-import { getHomepage, getChapters, getRecommendations, getMangaDetails, getMangaPages, getRandomManga, searchManga } from "../controllers/mangaController.js";
+import {
+  getHomepage,
+  getChapters,
+  getRecommendations,
+  getMangaDetails,
+  getMangaPages,
+  getRandomManga,
+  searchManga,
+} from "../controllers/mangaController.js";
 
 const router = express.Router();
 

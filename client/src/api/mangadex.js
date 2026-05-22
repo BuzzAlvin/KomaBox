@@ -3,6 +3,11 @@ const API_URL = "https://komabox.onrender.com/api";
 //Homepage data
 export const getHomepageData = async () => {
   const res = await fetch(`${API_URL}/homepage`);
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch homepage: ${res.status}`);
+  }
+  
   return res.json();
 };
 
