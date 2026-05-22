@@ -2,13 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useMangaDetail } from "../hooks/useMangaDetail";
 import { useChapter } from "../hooks/useChapter";
-import { useRecommendations } from "../hooks/useRecommendations";
+import { useRecommendations } from "../hooks/useRecommendation";
 import {
   addBookmark,
   removeBookmark,
   isBookmarked,
 } from "../utils/bookmarkStorage";
-
 import {
   FaFlag,
   FaUpload,
