@@ -7,7 +7,7 @@ export const getHomepageData = async () => {
   if (!res.ok) {
     throw new Error(`Failed to fetch homepage: ${res.status}`);
   }
-  
+
   return res.json();
 };
 

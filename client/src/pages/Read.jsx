@@ -59,7 +59,7 @@ const Read = () => {
         </Link>
 
         <Link className="flex items-center hover:underline capitalize cursor-pointer">
-          chapter {currentChapter?.number}
+          chapter {currentChapter?.number ??  "?"}
         </Link>
       </div>
       {/* Options */}
@@ -103,13 +103,13 @@ const Read = () => {
         <div className="flex flex-col items-center bg-surface p-2 sm:p-3 md:p-5 rounded-md shadow-md text-text-primary">
           {/* Chapter Title */}
           <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold mb-2 capitalize text-brand">
-            {title} {`Chapter ${currentChapter?.number || "?"}`}
+            {title} {`Chapter ${currentChapter?.number ?? "?"}`}
           </h2>
           {/* Chapter Description */}
           <p className="text-sm sm:text-base md:text-lg">
             You're reading{" "}
             <span className="font-semibold">
-              {title} {`Chapter ${currentChapter?.number || "?"}`}{" "}
+              {title} {`Chapter ${currentChapter?.number ?? "?"}`}{" "}
             </span>{" "}
             at KomaBox.
           </p>

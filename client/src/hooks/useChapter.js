@@ -29,6 +29,7 @@ export const useChapter = (mangaId) => {
       try {
         setLoading(true);
         setChapters([]); // Clear previous chapters when mangaId changes
+        setError(null); // Clear previous errors
 
         let allChapters = [];
         let offset = 0;
@@ -36,12 +37,18 @@ export const useChapter = (mangaId) => {
         let hasMore = true;
 
         while (hasMore) {
-          const data = await getChapterData(mangaId, offset, limit);
+          const data = await getChapterData(mangaId, limit, offset);
+
+          console.log("📦 Received data:", data);
+          console.log("📦 Data.data length:", data?.data?.length);
 
           if (data.data && data.data.length > 0) {
             const fetchedChapters = data.data.map((ch) => ({
               id: ch.id,
-              number: Number(ch.attributes.chapter),
+              number:
+                ch.attributes.chapter !== null && ch.attributes.chapter !== ""
+                  ? Number(ch.attributes.chapter)
+                  : null,
               title: ch.attributes.title,
               time: formatTime(ch.attributes.readableAt),
             }));
@@ -55,6 +62,18 @@ export const useChapter = (mangaId) => {
           }
         }
 
+        allChapters.sort((a, b) => {
+          // If both have numbers, sort numerically
+          if (a.number !== null && b.number !== null) {
+            return a.number - b.number;
+          }
+          // Put numbered chapters before unnumbered
+          if (a.number !== null) return -1;
+          if (b.number !== null) return 1;
+          // Both unnumbered, keep original order
+          return 0;
+        });
+
         setChapters(allChapters);
       } catch (error) {
         setError("Failed to load chapters."); // error message
@@ -65,7 +84,6 @@ export const useChapter = (mangaId) => {
     };
 
     if (mangaId) fetchChapters();
-    
   }, [mangaId]);
 
   return { chapters, error, loading };

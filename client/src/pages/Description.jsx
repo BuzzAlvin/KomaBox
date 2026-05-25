@@ -27,6 +27,7 @@ const Description = () => {
   const navigate = useNavigate();
 
   const { chapters, loading: chapterLoading } = useChapter(mangaId);
+console.log(chapters);
 
   //Fetch recommendation when tab is active
   const {
