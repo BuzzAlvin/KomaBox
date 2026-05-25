@@ -10,17 +10,6 @@ export const useHomepage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  /* Get the URL for a manga's cover image */
-  const getCoverUrl = (manga) => {
-    const coverRel = manga.relationships?.find(
-      (rel) => rel.type === "cover_art",
-    );
-    const fileName = coverRel?.attributes?.fileName;
-    return fileName
-      ? `https://uploads.mangadex.org/covers/${manga.id}/${fileName}`
-      : "/images/kilobyte.png";
-  };
-
   /* Description of the Manga */
   const getDescription = (manga) => {
     const desc = manga.attributes?.description;
@@ -63,32 +52,26 @@ export const useHomepage = () => {
 
         const { latest, popular, trending } = await getHomepageData();
 
-        console.log("✅ Latest:", latest);
-        console.log("✅ Popular:", popular);
-        console.log("✅ Trending:", trending);
+        console.log("Latest:", latest);
+        console.log("Popular:", popular);
+        console.log("Trending:", trending);
 
-        // ✅ Process latest chapters
+        // Process latest chapters
         const latestMap = new Map();
 
-        latest.forEach((chapter) => {
+        latest.forEach((item) => {
 
-          if (!latestMap.has(chapter.id)) {
+           if (!item.id || latestMap.has(item.id)) return;
 
-            latestMap.set(mangaFam.id, {
-              id: mangaFam.id,
-              title:
-                mangaFam.attributes?.title?.en ||
-                Object.values(mangaFam.attributes?.title || {})[0],
-              artist:
-                chapter.relationships.find((r) => r.type === "artist")?.attributes
-                  ?.name || "Unknown Artist",
-              time: formatTime(chapter.attributes.readableAt),
-              cover: coverMap.get(mangaFam.id) || "/images/kilobyte.png",
-              latestChapter: chapter.attributes.chapter,
-              chapterId: chapter.id,
-              source: "latest",
-            });
-          }
+          latestMap.set(item.id, {
+            id: item.id,
+            chapterId: item.chapterId,
+            title: item.title || "Unknown",
+            cover: item.cover || "/images/kilobyte.png",
+            latestChapter: item.chapter,
+            time: formatTime(item.updatedAt),
+            source: "latest",
+          });
         });
 
         // Process popular manga
@@ -97,7 +80,7 @@ export const useHomepage = () => {
           title: manga.title || "Unknown",
           cover: manga.cover || "/images/kilobyte.png",
           description: manga.description || "No description available.",
-          status: manga.status,
+          status: manga.status || "Unknown",
           source: "popular",
         }));
 
@@ -107,7 +90,7 @@ export const useHomepage = () => {
           title: manga.title || "Unknown",
           cover: manga.cover || "/images/kilobyte.png",
           description: manga.description || "No description available.",
-          status: manga.status,
+          status: manga.status || "Unknown",
           source: "trending",
         }));
 
