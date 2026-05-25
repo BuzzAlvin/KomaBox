@@ -59,71 +59,64 @@ export const useHomepage = () => {
     const HomepageData = async () => {
       try {
         setLoading(true);
+        setError(null);
 
         const { latest, popular, trending } = await getHomepageData();
 
-        const mangaIds = [
-          ...new Set(
-            latest
-              .map((ch) => ch.relationships.find((r) => r.type === "manga")?.id)
-              .filter(Boolean),
-          ),
-        ];
+        console.log("✅ Latest:", latest);
+        console.log("✅ Popular:", popular);
+        console.log("✅ Trending:", trending);
 
-        const mangaRes = await fetch(
-  `/.netlify/functions/mangadex?path=manga&ids[]=${mangaIds.join("&ids[]=")}&includes[]=cover_art`
-);
-
-        const mangaData = await mangaRes.json();
-
-        const coverMap = new Map();
-
-        mangaData.data.forEach((manga) => {
-          const coverRel = manga.relationships.find(
-            (r) => r.type === "cover_art",
-          );
-
-          const fileName = coverRel?.attributes?.fileName;
-
-          if (fileName) {
-            coverMap.set(
-              manga.id,
-              `https://uploads.mangadex.org/covers/${manga.id}/${fileName}`,
-            );
-          }
-        });
-
-        /* Dedupe logic (Avoid duplicating mangas due to the api response) */
+        // ✅ Process latest chapters
         const latestMap = new Map();
 
         latest.forEach((chapter) => {
-          const mangaFam = chapter.relationships.find(
-            (rel) => rel.type === "manga",
-          );
 
-          if (!mangaFam || latestMap.has(mangaFam.id)) return;
+          if (!latestMap.has(chapter.id)) {
 
-          latestMap.set(mangaFam.id, {
-            id: mangaFam.id,
-            title:
-              mangaFam.attributes?.title?.en ||
-              Object.values(mangaFam.attributes?.title || {})[0],
-            artist:
-              chapter.relationships.find((r) => r.type === "artist")?.attributes
-                ?.name || "Unknown Artist",
-            time: formatTime(chapter.attributes.readableAt),
-            cover: coverMap.get(mangaFam.id) || "/images/kilobyte.png",
-            latestChapter: chapter.attributes.chapter,
-            chapterId: chapter.id,
-            source: "latest",
-          });
+            latestMap.set(mangaFam.id, {
+              id: mangaFam.id,
+              title:
+                mangaFam.attributes?.title?.en ||
+                Object.values(mangaFam.attributes?.title || {})[0],
+              artist:
+                chapter.relationships.find((r) => r.type === "artist")?.attributes
+                  ?.name || "Unknown Artist",
+              time: formatTime(chapter.attributes.readableAt),
+              cover: coverMap.get(mangaFam.id) || "/images/kilobyte.png",
+              latestChapter: chapter.attributes.chapter,
+              chapterId: chapter.id,
+              source: "latest",
+            });
+          }
         });
+
+        // Process popular manga
+        const popularFormatted = popular.map((manga) => ({
+          id: manga.id,
+          title: manga.title || "Unknown",
+          cover: manga.cover || "/images/kilobyte.png",
+          description: manga.description || "No description available.",
+          status: manga.status,
+          source: "popular",
+        }));
+
+         // Process trending manga
+        const trendingFormatted = trending.map((manga) => ({
+          id: manga.id,
+          title: manga.title || "Unknown",
+          cover: manga.cover || "/images/kilobyte.png",
+          description: manga.description || "No description available.",
+          status: manga.status,
+          source: "trending",
+        }));
+
 
         setData((prevData) => ({
           ...prevData,
           latest: Array.from(latestMap.values()),
-          popular: normalizeMangaList(popular),
-          trending: normalizeMangaList(trending),
+          popular: popularFormatted,
+          trending: trendingFormatted,
         }));
 
         setError(null);

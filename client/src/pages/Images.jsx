@@ -40,16 +40,7 @@ const ImagePage = () => {
               src={img.cover}
               alt={img.title}
               className="w-full aspect-3/4 object-cover rounded"
-              onError={(e) => {
-                if (
-                  manga.coverOriginal &&
-                  e.currentTarget.src !== manga.coverOriginal
-                ) {
-                  e.currentTarget.src = manga.coverOriginal;
-                } else {
-                  e.currentTarget.src = fallbackImage;
-                }
-              }}
+
             />
           </div>
         ))}

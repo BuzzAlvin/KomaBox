@@ -19,11 +19,75 @@ export const getHomepage = async (req, res) => {
       trendingRes.json(),
     ]);
 
-    res.json({
-      latest: latestData.data,
-      popular: popularData.data,
-      trending: trendingData.data,
+    // Helper to extract cover
+    const extractCover = (manga) => {
+      const coverRel = manga.relationships?.find(
+        (rel) => rel.type === "cover_art"
+      );
+      const fileName = coverRel?.attributes?.fileName;
+      return fileName
+        ? `https://uploads.mangadex.org/covers/${manga.id}/${fileName}.256.jpg`
+        : null;
+    };
+
+    // Format latest chapters
+    const latestFormatted = latestData.data.map((chapter) => {
+      const mangaRel = chapter.relationships?.find(
+        (rel) => rel.type === "manga"
+      );
+      const coverRel = chapter.relationships?.find(
+        (rel) => rel.type === "cover_art"
+      );
+
+      const mangaId = mangaRel?.id;
+      const fileName = coverRel?.attributes?.fileName;
+
+      return {
+        id: mangaId,
+        chapterId: chapter.id,
+        title:
+          mangaRel?.attributes?.title?.en ||
+          Object.values(mangaRel?.attributes?.title || {})[0] ||
+          "Unknown",
+        cover: fileName && mangaId
+          ? `https://uploads.mangadex.org/covers/${mangaId}/${fileName}.256.jpg`
+          : null,
+        chapter: chapter.attributes.chapter,
+        updatedAt: chapter.attributes.readableAt,
+      };
     });
+
+    // Format popular manga
+    const popularFormatted = popularData.data.map((manga) => ({
+      id: manga.id,
+      title:
+        manga.attributes.title.en ||
+        Object.values(manga.attributes.title)[0] ||
+        "Unknown",
+      cover: extractCover(manga),
+      description: manga.attributes.description?.en || "",
+      status: manga.attributes.status,
+    }));
+
+    // Format trending manga
+    const trendingFormatted = trendingData.data.map((manga) => ({
+      id: manga.id,
+      title:
+        manga.attributes.title.en ||
+        Object.values(manga.attributes.title)[0] ||
+        "Unknown",
+      cover: extractCover(manga),
+      description: manga.attributes.description?.en || "",
+      status: manga.attributes.status,
+    }));
+
+    res.json({
+      latest: latestFormatted,
+      popular: popularFormatted,
+      trending: trendingFormatted,
+    });
+
+
   } catch (error) {
     res.status(500).json({
       error: "Failed to fetch homepage data",
@@ -286,5 +350,55 @@ export const searchManga = async (req, res) => {
     res.json(results);
   } catch (err) {
     res.status(500).json({ error: "Search failed" });
+  }
+};
+
+//proxy images
+export const proxyImage = async (req, res) => {
+  try {
+    const { url } = req.query;
+
+    if (!url) {
+      return res.status(400).json({ error: "No URL provided" });
+    }
+
+    // Only allow MangaDex image URLs for security
+    const allowedDomains = [
+      "uploads.mangadex.org",
+      "cmdxd98sb0x3yprd.mangadex.network",
+      "mangadex.network",
+    ];
+
+    const isAllowed = allowedDomains.some((domain) => url.includes(domain));
+
+    if (!isAllowed) {
+      return res.status(403).json({ error: "Domain not allowed" });
+    }
+
+    const response = await fetch(url, {
+      headers: {
+        "Referer": "https://mangadex.org",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+      }
+    });
+
+    if (!response.ok) {
+      return res.status(response.status).json({ error: "Failed to fetch image" });
+    }
+
+    // Get content type
+    const contentType = response.headers.get("content-type") || "image/jpeg";
+    
+    // Set headers
+    res.set("Content-Type", contentType);
+    res.set("Cache-Control", "public, max-age=86400"); // Cache for 24 hours
+
+    // Stream image directly to frontend
+    const buffer = await response.arrayBuffer();
+    res.send(Buffer.from(buffer));
+
+  } catch (error) {
+    console.error("Image proxy error:", error);
+    res.status(500).json({ error: "Failed to proxy image" });
   }
 };

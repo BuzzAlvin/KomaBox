@@ -84,3 +84,10 @@ export const searchManga = async (query) => {
     }
   return res.json();
 };
+
+//Proxy images
+// Use this to wrap ALL MangaDex image URLs
+export const proxyImage = (imageUrl) => {
+  if (!imageUrl) return null;
+  return `${API_URL}/proxy/image?url=${encodeURIComponent(imageUrl)}`;
+};
