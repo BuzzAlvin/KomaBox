@@ -11,15 +11,15 @@ const ImagePage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-  const main = document.querySelector("main");
+    const main = document.querySelector("main");
 
-  if (main) {
-    main.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }
-}, [page]);
+    if (main) {
+      main.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+  }, [page]);
 
   return (
     <div className="p-3 sm:p-4 md:p-6">
@@ -40,6 +40,16 @@ const ImagePage = () => {
               src={img.cover}
               alt={img.title}
               className="w-full aspect-3/4 object-cover rounded"
+              onError={(e) => {
+                if (
+                  manga.coverOriginal &&
+                  e.currentTarget.src !== manga.coverOriginal
+                ) {
+                  e.currentTarget.src = manga.coverOriginal;
+                } else {
+                  e.currentTarget.src = fallbackImage;
+                }
+              }}
             />
           </div>
         ))}
@@ -59,7 +69,9 @@ const ImagePage = () => {
             </span>
           </button>
 
-          <span className="px-4 py-2 text-xs sm:text-sm md:text-base text-text-secondary">Page {page}</span>
+          <span className="px-4 py-2 text-xs sm:text-sm md:text-base text-text-secondary">
+            Page {page}
+          </span>
 
           <button
             onClick={() => setPage((p) => p + 1)}

@@ -37,7 +37,9 @@ export const getMangaDetails = async (mangaId) => {
 
 //Read Manga Pages
 export const getMangaPages = async (chapterId) => {
-    const res = await fetch(`${API_URL}/read/${chapterId}`);
+    const res = await fetch(`${API_URL}/read/${chapterId}`, {
+        cache: "no-store", // Ensure we always get fresh data
+    });
 
     if(!res.ok) {
         throw new Error("Failed to fetch manga pages");
