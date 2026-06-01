@@ -52,10 +52,6 @@ export const useHomepage = () => {
 
         const { latest, popular, trending } = await getHomepageData();
 
-        console.log("Latest:", latest);
-        console.log("Popular:", popular);
-        console.log("Trending:", trending);
-
         // Process latest chapters
         const latestMap = new Map();
 
@@ -101,6 +97,8 @@ export const useHomepage = () => {
           popular: popularFormatted,
           trending: trendingFormatted,
         }));
+
+        console.log("Latest:", latest);
 
         setError(null);
       } catch (err) {

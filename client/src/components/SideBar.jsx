@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   FaHome,
   FaHeart,
@@ -39,6 +39,8 @@ const SideBar = ({
     { name: "Account", icon: FaUser },
   ];
 
+  const navigate = useNavigate();
+
   const renderMenu = (menu) =>
     menu.map((list, index) => {
       const Icon = list.icon;
@@ -68,6 +70,8 @@ const SideBar = ({
         );
       }
 
+
+
       /* If the button is for an action i.e. toggle button */
       return (
         <li
@@ -95,7 +99,7 @@ const SideBar = ({
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-text-primary/40 sm:hidden"
+          className="fixed inset-0 bg-text-primary/40 sm:hidden cursor-pointer"
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -114,7 +118,10 @@ const SideBar = ({
                 alt="KomaBox"
                 className="w-6 h-6 rounded-lg "
               />
-              <h2 className="text-brand md:text-xl sm:text-lg text-base font-bold">
+              <h2
+                onClick={() => navigate(`/`)}
+                className="text-brand md:text-xl sm:text-lg text-base font-bold"
+              >
                 KomaBox
               </h2>
             </span>
@@ -146,7 +153,9 @@ const SideBar = ({
                   alt="KomaBox"
                   className="w-8 h-8 rounded-lg "
                 />
-                <h2 className="text-brand text-xl font-bold">KomaBox</h2>
+                <h2 
+                onClick={() => navigate(`/`)}
+                className="text-brand text-xl font-bold cursor-pointer">KomaBox</h2>
               </span>
             )}
             <button

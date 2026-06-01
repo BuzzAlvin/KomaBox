@@ -1,25 +1,22 @@
 //Get Homepage data
 export const getHomepage = async (req, res) => {
   try {
-    const [latestRes, popularRes, trendingRes] = await Promise.all([
-      fetch(
-        "https://api.mangadex.org/chapter?order[readableAt]=desc&limit=30&translatedLanguage[]=en&includes[]=manga&includes[]=cover_art",
-      ),
-      fetch(
-        "https://api.mangadex.org/manga?order[followedCount]=desc&limit=20&includes[]=cover_art",
-      ),
-      fetch(
-        "https://api.mangadex.org/manga?order[createdAt]=desc&limit=20&includes[]=cover_art",
-      ),
-    ]);
+    const latestRes = await fetch(
+      "https://api.mangadex.org/chapter?order[readableAt]=desc&limit=30&translatedLanguage[]=en&includes[]=manga"
+    );
 
-    const [latestData, popularData, trendingData] = await Promise.all([
-      latestRes.json(),
-      popularRes.json(),
-      trendingRes.json(),
-    ]);
+    const popularRes = await fetch(
+      "https://api.mangadex.org/manga?order[followedCount]=desc&limit=20&includes[]=cover_art"
+    );
 
-    // Helper to extract cover
+    const trendingRes = await fetch(
+      "https://api.mangadex.org/manga?order[createdAt]=desc&limit=20&includes[]=cover_art"
+    );
+
+    const latestData = await latestRes.json();
+    const popularData = await popularRes.json();
+    const trendingData = await trendingRes.json();
+
     const extractCover = (manga) => {
       const coverRel = manga.relationships?.find(
         (rel) => rel.type === "cover_art"
@@ -30,17 +27,52 @@ export const getHomepage = async (req, res) => {
         : null;
     };
 
-    // Format latest chapters
-    const latestFormatted = latestData.data.map((chapter) => {
-      const mangaRel = chapter.relationships?.find(
-        (rel) => rel.type === "manga"
-      );
-      const coverRel = chapter.relationships?.find(
-        (rel) => rel.type === "cover_art"
-      );
+    // ✅ Get unique manga IDs from latest chapters
+    const uniqueMangaIds = [...new Set(
+      latestData.data
+        .map(ch => ch.relationships.find(r => r.type === "manga")?.id)
+        .filter(Boolean)
+    )];
 
+    console.log(`Fetching covers for ${uniqueMangaIds.length} manga...`);
+
+    // ✅ Use bulk fetch with proper URL encoding
+    const coverMap = new Map();
+    
+    if (uniqueMangaIds.length > 0) {
+      // MangaDex allows up to 100 IDs per request
+      const idsParam = uniqueMangaIds.map(id => `ids[]=${id}`).join("&");
+      const bulkUrl = `https://api.mangadex.org/manga?${idsParam}&limit=100&includes[]=cover_art`;
+      
+      console.log("Bulk URL length:", bulkUrl.length);
+      
+      try {
+        const bulkRes = await fetch(bulkUrl);
+        const bulkJson = await bulkRes.json();
+        
+        console.log("Bulk fetch result:", bulkJson.result);
+        console.log("Manga returned:", bulkJson.data?.length);
+        
+        if (bulkJson.data && Array.isArray(bulkJson.data)) {
+          bulkJson.data.forEach(manga => {
+            const cover = extractCover(manga);
+            if (cover) {
+              coverMap.set(manga.id, cover);
+            } else {
+              console.log(`No cover for manga ${manga.id}`);
+            }
+          });
+        }
+      } catch (err) {
+        console.error("Bulk cover fetch failed:", err.message);
+      }
+    }
+
+    console.log(`Got ${coverMap.size} covers out of ${uniqueMangaIds.length} manga`);
+
+    const latestFormatted = latestData.data.map((chapter) => {
+      const mangaRel = chapter.relationships?.find((rel) => rel.type === "manga");
       const mangaId = mangaRel?.id;
-      const fileName = coverRel?.attributes?.fileName;
 
       return {
         id: mangaId,
@@ -49,15 +81,12 @@ export const getHomepage = async (req, res) => {
           mangaRel?.attributes?.title?.en ||
           Object.values(mangaRel?.attributes?.title || {})[0] ||
           "Unknown",
-        cover: fileName && mangaId
-          ? `https://uploads.mangadex.org/covers/${mangaId}/${fileName}.256.jpg`
-          : null,
+        cover: mangaId ? (coverMap.get(mangaId) || null) : null,
         chapter: chapter.attributes.chapter,
         updatedAt: chapter.attributes.readableAt,
       };
     });
 
-    // Format popular manga
     const popularFormatted = popularData.data.map((manga) => ({
       id: manga.id,
       title:
@@ -69,7 +98,6 @@ export const getHomepage = async (req, res) => {
       status: manga.attributes.status,
     }));
 
-    // Format trending manga
     const trendingFormatted = trendingData.data.map((manga) => ({
       id: manga.id,
       title:
@@ -87,10 +115,11 @@ export const getHomepage = async (req, res) => {
       trending: trendingFormatted,
     });
 
-
   } catch (error) {
+    console.error("Homepage error:", error);
     res.status(500).json({
       error: "Failed to fetch homepage data",
+      details: error.message,
     });
   }
 };
