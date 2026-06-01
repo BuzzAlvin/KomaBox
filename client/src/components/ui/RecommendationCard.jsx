@@ -11,6 +11,7 @@ const RecommendationCard = ({ manga }) => {
           src={manga.cover}
           alt={manga.title}
           className="block w-full aspect-2/3 object-cover rounded-lg"
+          referrerPolicy="no-referrer"
         />
 
          {/* Overlay title (for recommendation) */}

@@ -31,9 +31,7 @@ const formatTime = (dateString) => {
           src={proxyImage(manga?.cover)}
           alt={manga?.title}
           className="w-18 sm:w-22 md:w-26 h-full aspect-3/4 object-cover rounded-md shadow-md"
-          onError={(e) => {
-            e.currentTarget.src = "/images/kilobyte.png";
-          }}
+          referrerPolicy="no-referrer"
         />
 
       <div className="flex flex-col gap-1.5 w-full">

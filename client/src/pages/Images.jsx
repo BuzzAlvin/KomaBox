@@ -40,7 +40,7 @@ const ImagePage = () => {
               src={img.cover}
               alt={img.title}
               className="w-full aspect-3/4 object-cover rounded"
-
+              referrerPolicy="no-referrer"
             />
           </div>
         ))}

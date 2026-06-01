@@ -121,6 +121,7 @@ const Search = () => {
                   src={manga.cover}
                   alt={manga.title}
                   className="w-10 h-14 object-cover rounded"
+                  referrerPolicy="no-referrer"
                 />
                 <div>
                   <p className="text-xs md:text-sm font-medium">{manga.title}</p>

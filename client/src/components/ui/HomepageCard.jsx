@@ -20,6 +20,7 @@ const HomepageCard = ({ manga }) => {
         src={manga?.cover}
         alt={manga?.title}
         className="w-full h-auto aspect-2/3 object-cover rounded-md shadow-md"
+        referrerPolicy="no-referrer"
       />
     </div>
 

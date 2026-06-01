@@ -85,4 +85,10 @@ export const searchManga = async (query) => {
   return res.json();
 };
 
-;
+//Proxy Image
+export const proxyImage = (imageUrl) => {
+  if (!imageUrl) return "/images/kilobyte.png";
+  if (!imageUrl.includes("mangadex")) return imageUrl;
+  return `/proxy-image?url=${encodeURIComponent(imageUrl)}`;
+  // ☝️ No domain needed - it calls the same Cloudflare Pages domain
+};
