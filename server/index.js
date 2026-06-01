@@ -1,10 +1,12 @@
 import express from "express";
 import cors from "cors";
+import compression from "compression";
 import mangaRoutes from "./routes/mangaRoutes.js";
 
 const app = express();
 
 app.use(cors());
+app.use(compression());
 
 app.use("/api", mangaRoutes);
 
