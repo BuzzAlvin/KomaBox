@@ -7,7 +7,6 @@ import {
   getMangaPages,
   getRandomManga,
   searchManga,
-  proxyImage,
 } from "../controllers/mangaController.js";
 
 const router = express.Router();
@@ -26,6 +25,6 @@ router.get("/recommendations/:mangaId", getRecommendations);
 
 router.get("/search", searchManga);
 
-router.get("/proxy/image", proxyImage);
+
 
 export default router;

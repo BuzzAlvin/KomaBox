@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { proxyImage } from "../../api/mangadex";
 
 const LatestBox = ({manga, variant}) => {
   const navigate = useNavigate();
@@ -27,9 +28,12 @@ const formatTime = (dateString) => {
   return (
     <div onClick={() => handleClick()} className="flex items-center gap-2 cursor-pointer"> 
         <img
-          src={manga?.cover}
+          src={proxyImage(manga?.cover)}
           alt={manga?.title}
           className="w-18 sm:w-22 md:w-26 h-full aspect-3/4 object-cover rounded-md shadow-md"
+          onError={(e) => {
+            e.currentTarget.src = "/images/kilobyte.png";
+          }}
         />
 
       <div className="flex flex-col gap-1.5 w-full">

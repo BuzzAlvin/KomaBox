@@ -21,7 +21,7 @@ const PopularCard = ({ handlePrev, handleNext, manga }) => {
         {/* Manga Image */}
         <div className="shrink-0 w-40 sm:w-60 md:w-72">
           <img
-            src={manga?.cover || "../images/logo.png"}
+            src={manga?.cover}
             alt={manga?.title || "Manga Cover"}
             className="w-full h-auto aspect-2/3 object-cover rounded-md shadow-md"
           />
